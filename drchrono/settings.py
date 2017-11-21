@@ -109,3 +109,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
 STATIC_URL = '/static/'
+
+
+# Social Auth Settings
+
+SOCIAL_AUTH_DRCHRONO_KEY = "hFSpEdPOmVtejuCM2zpNJ48uEbmPSBdf84eMz2C4"
+SOCIAL_AUTH_DRCHRONO_SECRET = "8PV19sa6WYLA3JqRRSi7VsYBMt1iGHF0Unw81fxVQ2jl70agR9C3Lie0ZwLxILbiohP0RpLZJrKgSZA7oQmuDnbOK1s1uR8ocyZlj897ocuAl2wiHEgCfwyWpCnJClrK"
+SOCIAL_AUTH_DRCHRONO_SCOPE = []
+LOGIN_REDIRECT_URL = "http://localhost:8000"
