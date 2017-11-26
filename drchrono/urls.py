@@ -8,9 +8,10 @@ urlpatterns = [
     url(r'^$', TemplateView.as_view(template_name='index.html'), name='home'),
     url(r'^begin$', TemplateView.as_view(template_name='begin.html'), name='begin'),
     url(r'^p_login$', views.patient_checkin, name='p_login'),
+    url(r'^demographic/(\d+)$', views.demographics, name='demog'),
     
     # url(r'^p_login$', TemplateView.as_view(template_name='patient_login.html'), name='p_login'),
-    url(r'^demographic$', TemplateView.as_view(template_name='demographic.html'), name='demog'),
+    # url(r'^demographic$', TemplateView.as_view(template_name='demographic.html'), name='demog'),
     url(r'^checkin$', TemplateView.as_view(template_name='checkin.html'), name='checkin'),
     url(r'^d_login$', TemplateView.as_view(template_name='doctor_login.html'), name='d_login'),
     url(r'^d_logout$', TemplateView.as_view(template_name='doctor_logout.html'), name='d_logout'),
