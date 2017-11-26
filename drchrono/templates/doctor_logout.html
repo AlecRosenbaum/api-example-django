@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block head %}
+
+    <style>
+        .ctr {
+            position: absolute;
+            top: 20%;
+            /*transform: translateY(-50%);*/
+            text-align: center;
+            width: 100%;
+            font-size: 1.5em;
+        }
+
+        input {
+            color: black;
+        }
+
+        .dropdown {
+            display: inline-block;
+            width: unset;
+        }
+
+        #back-btn {
+            margin-left: 15px;
+            margin-top: 15px;
+        }
+
+        .remove {
+            color: red;
+        }
+    </style>
+
+{% endblock %}
+
+{% block content %}
+    <button id="back-btn" type="button" class="btn btn-info" onclick="location.href='{% url 'begin' %}'">Return To Main Screen</button>
+    <h1 class="header">Dr. Professor Barnicle Cucumber</h1>
+    <div class="ctr">
+        <button class="btn btn-danger" onclick="location.href='{% url 'd_login' %}'">Logout</button>
+    </div>
+
+{% endblock %}

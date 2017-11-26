@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block head %}
+
+    <style>
+        .ctr {
+            position: absolute;
+            top: 20%;
+            /*transform: translateY(-50%);*/
+            text-align: center;
+            width: 100%;
+            font-size: 1.5em;
+        }
+
+        input {
+            color: black;
+        }
+
+        #back-btn {
+            margin-left: 15px;
+            margin-top: 15px;
+        }
+    </style>
+
+{% endblock %}
+
+{% block content %}
+    <button id="back-btn" type="button" class="btn btn-info">Logout</button>
+    <div class="ctr">
+        <div>
+            <strong>8</strong> min average wait time.
+        </div>
+
+        <div>
+            <span>Current Waitlist:</span> <!-- current doctor only -->
+            <ul>
+                <li><button class="btn btn-success"><i class="fa fa-check" aria-hidden="true"></i></button> <strong>1:15PM</strong> - <i class="fa fa-clock-o" aria-hidden="true"></i> <strong>8</strong> min - Patient Name</li>
+
+                <li><strong>1:20PM</strong> - Arrived <strong>1</strong> min ago.</li>
+                <li><strong>1:20PM</strong> - Arrived <strong>1</strong> min ago.</li>
+            </ul>
+        </div>
+        
+    </div>
+
+{% endblock %}
