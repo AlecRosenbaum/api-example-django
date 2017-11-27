@@ -64,10 +64,12 @@ class DemographicsForm(forms.Form):
     nick_name = forms.CharField(label='Nick Name', max_length=100, required=False)
     # 'date_of_birth': '1995-10-14',
     date_of_birth = forms.DateField(label='Date of Birth')
+    date_of_birth.widget.attrs['class'] = 'input-date'
     # 'gender': 'Female',
     gender = forms.ChoiceField(label='Gender', choices=GENDERS)
     # 'social_security_number': '',
     social_security_number = forms.CharField(label='SSN', max_length=11, required=False)
+    social_security_number.widget.attrs['class'] = 'input-ssn'
     # 'race': 'blank',
     race = forms.ChoiceField(label='Race', choices=RACE, required=False)
     # 'ethnicity': 'blank',
@@ -76,10 +78,13 @@ class DemographicsForm(forms.Form):
     preferred_language = forms.ChoiceField(label='Preferred Language', choices=LANGUAGES, required=False)
     # 'home_phone': '',
     home_phone = forms.CharField(label='Home Phone', max_length=15, required=False)
+    home_phone.widget.attrs['class'] = 'input-home-phone'
     # 'cell_phone': '',
     cell_phone = forms.CharField(label='Cell Phone', max_length=15, required=False)
+    cell_phone.widget.attrs['class'] = 'input-cell-phone'
     # 'office_phone': '',
     office_phone = forms.CharField(label='Work Phone', max_length=15, required=False)
+    office_phone.widget.attrs['class'] = 'input-work-phone'
     # 'email': '',
     email = forms.EmailField(label='Email', required=False)
     # 'address': '',
@@ -94,6 +99,7 @@ class DemographicsForm(forms.Form):
     emergency_contact_name = forms.CharField(label='Emergency Contact Name', max_length=255, required=False)
     # 'emergency_contact_phone': '',
     emergency_contact_phone = forms.CharField(label='Emergency Conatct Phone', max_length=15, required=False)
+    emergency_contact_phone.widget.attrs['class'] = 'input-emergency-phone'
     # 'emergency_contact_relation': '',
     emergency_contact_relation = forms.CharField(label='Emergency Contact Relation', max_length=100, required=False)
     # 'employer': '',
@@ -114,6 +120,7 @@ class DemographicsForm(forms.Form):
     responsible_party_relation = forms.CharField(label='Responsible Party Relation', max_length=100, required=False)
     # 'responsible_party_phone': '',
     responsible_party_phone = forms.CharField(label='Responsible Party Phone', max_length=15, required=False)
+    responsible_party_phone.widget.attrs['class'] = 'input-responsible-phone'
     # 'responsible_party_email': '',
     responsible_party_email = forms.EmailField(label='Responsible Party Email', required=False)
 

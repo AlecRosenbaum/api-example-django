@@ -9,6 +9,7 @@
     <button id="back-btn" type="button" class="btn btn-info" onclick="location.href='{% url 'p_login' appt_id patient_id %}'">Back</button>
     <h1 class="header">DEMOGRAPHICS</h1>
     <div class="ctr">
+        <img src="{{ patient_photo }}">
         <form method="post">
             {% csrf_token %}
             <table>
@@ -19,4 +20,33 @@
         </form>
     </div>
 
+    <script type="text/javascript" src="https://nosir.github.io/cleave.js/dist/cleave.min.js"></script>
+    <script type="text/javascript">
+        // phone
+        var phone_fields = [
+            '.input-home-phone',
+            '.input-cell-phone',
+            '.input-work-phone',
+            '.input-emergency-phone',
+            '.input-responsible-phone']
+        phone_fields.forEach(function(elem) {
+            var cleavePhone = new Cleave(elem, {
+                blocks: [3, 3, 4],
+                delimiters: [' ', '-']
+            });
+        });
+
+        // ssn
+        var cleaveSSN = new Cleave('.input-ssn', {
+          blocks: [3, 2, 4],
+          delimiter: '-'
+        });
+
+        // date
+        var cleaveDate = new Cleave('.input-date', {
+          date: true,
+          datePattern: ['Y', 'm', 'd'],
+          delimiter: '-'
+        });
+    </script>
 {% endblock %}

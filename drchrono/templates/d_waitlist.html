@@ -35,7 +35,7 @@
     <button id="back-btn" type="button" class="btn btn-info" onclick="location.href='{% url 'logout' %}'">Logout</button>
     <div class="ctr">
         <div>
-            <strong>{{ avg_wait_time }}</strong> min average wait time.
+            <strong>{{ avg_wait_time }}</strong> min average wait time (over {{ num_averaged }} appointments).
         </div>
 
         <div>

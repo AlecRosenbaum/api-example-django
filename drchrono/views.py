@@ -74,6 +74,10 @@ def demographics(request, appt_id, patient_id):
     """Handles updating demographics information"""
     access_token = request.user.social_auth.get(provider="drchrono").extra_data["access_token"]
 
+    # query API for patient data, then populate form
+    data = drchrono_api.get_patient(access_token, patient_id)
+    print(data)
+
     if request.method == 'POST':
         form = DemographicsForm(request.POST)
         if form.is_valid():
@@ -81,13 +85,21 @@ def demographics(request, appt_id, patient_id):
             response = drchrono_api.put_patient(access_token, patient_id, form.cleaned_data)
 
             # handle API response
-            if 200 <= response.status_code < 400:
+            print(response)
+            print(response.status_code)
+            if 204 == response.status_code:
                 return HttpResponseRedirect(reverse('checkin', args=[appt_id]))
             else:
                 form.add_error(None, 'Data not submitted. Please try again.')
     else:
-        # query API for patient data, then populate form
-        data = drchrono_api.get_patient(access_token, patient_id)
+        phone_fields = (
+            'home_phone',
+            'cell_phone',
+            'office_phone',
+            'emergency_contact_phone',
+            'responsible_party_phone',)
+        for i in phone_fields:
+            data[i] = re.sub(r"(?!\d).?", "", data[i])
         form = DemographicsForm(initial=data)
 
     return render(
@@ -96,7 +108,9 @@ def demographics(request, appt_id, patient_id):
         {
             'form': form,
             'appt_id': appt_id,
-            'patient_id': patient_id})
+            'patient_id': patient_id,
+            'patient_photo': data['patient_photo'],
+        })
 
 
 # TODO: add appointment details verification screen?
@@ -204,6 +218,7 @@ def waitlist(request):
         {
             'appointments': appointments,
             'avg_wait_time': avg_wait_time,
+            'num_averaged': len(wait_times),
         })
 
 
