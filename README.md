@@ -1,6 +1,7 @@
 # drchrono Hackathon
 
 ### Requirements
+- [python 3.5](https://www.python.org/downloads/release/python-354/)
 - [pip](https://pip.pypa.io/en/stable/)
 - [python virtual env](https://packaging.python.org/installing/#creating-and-using-virtual-environments)
 

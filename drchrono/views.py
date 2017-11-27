@@ -207,10 +207,15 @@ def waitlist(request):
 
         # calculate average wait time
         wait_times = []
+        today_wait_times = []
         for appt in Appointment.objects.all():
             seen_time = appt.seen if appt.seen is not None else datetime.datetime.utcnow().replace(tzinfo=utc)
-            wait_times.append((seen_time - appt.check_in).total_seconds() / 60)
+            elapsed_time = (seen_time - appt.check_in).total_seconds() / 60
+            wait_times.append(elapsed_time)
+            if seen_time.date() == datetime.datetime.today().date():
+                today_wait_times.append(elapsed_time)
         avg_wait_time = int(sum(wait_times)/len(wait_times)) if len(wait_times) > 0 else 0
+        avg_wait_time_today = int(sum(today_wait_times)/len(today_wait_times)) if len(today_wait_times) > 0 else 0
 
     return render(
         request,
@@ -219,6 +224,7 @@ def waitlist(request):
             'appointments': appointments,
             'avg_wait_time': avg_wait_time,
             'num_averaged': len(wait_times),
+            'avg_wait_time_today': avg_wait_time_today,
         })
 
 

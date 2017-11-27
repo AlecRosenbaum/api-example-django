@@ -37,6 +37,10 @@
         <div>
             <strong>{{ avg_wait_time }}</strong> min average wait time (over {{ num_averaged }} appointments).
         </div>
+        <div>
+            <strong>{{ avg_wait_time_today }}</strong> min average wait time today.
+        </div>
+        <br/>
 
         <div>
             <span>Current Waitlist:</span> <!-- current doctor only -->
@@ -53,8 +57,14 @@
                     {% endfor %}
                 </ul>
             </form>
-        </div>
-        
+        </div> 
     </div>
+
+    <script type="text/javascript">
+        // redirect to the main page after a timeout
+        setTimeout(function() {
+            location.href="{% url 'd_waitlist' %}";
+        }, 60000); // ater 1 minute
+    </script>
 
 {% endblock %}
