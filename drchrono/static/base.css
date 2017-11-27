@@ -23,3 +23,33 @@
     text-align: center;
     margin-top: 15px;
 }
+
+.ctr {
+    position: absolute;
+    top: 20%;
+    text-align: center;
+    width: 100%;
+    font-size: 1.5em;
+}
+
+input, select {
+    color: black;
+}
+
+.dropdown {
+    display: inline-block;
+    width: unset;
+}
+
+#back-btn {
+    margin-left: 15px;
+    margin-top: 15px;
+}
+
+ul {
+    display: inline-block;
+    list-style: none;
+}
+li {
+    text-align: left;
+}

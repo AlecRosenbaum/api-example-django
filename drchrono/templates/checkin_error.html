@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block head %}
+
+    <style>
+        #container {
+            background-color: #d9534f;
+        }
+    </style>
+
+{% endblock %}
+
+{% block content %}
+    <button id="back-btn" type="button" class="btn btn-info" onclick="location.href='{% url 'appt' %}'">Return To Main Screen</button>
+    <h1 class="header"><i class="fa fa-times" aria-hidden="true"></i> Error Checking In!</h1>
+    <div class="ctr">
+        <div>
+            <p>There was a problem, please try again!</p>
+        </div>
+        
+    </div>
+
+{% endblock %}

@@ -22,6 +22,7 @@ def get_todays_appointments(access_token):
 
 
 def get_appointment(access_token, appointment_id):
+    """query the appointment endpoint"""
     response = requests.get(
         DRCHRONO_API_BASE + 'appointments/{}'.format(appointment_id),
         headers={
@@ -34,6 +35,7 @@ def get_appointment(access_token, appointment_id):
 
 
 def put_appointment(access_token, appointment_id, data):
+    """put to the appointment endpoint"""
     response = requests.put(
         DRCHRONO_API_BASE + 'appointments/{}'.format(appointment_id),
         headers={
@@ -44,6 +46,7 @@ def put_appointment(access_token, appointment_id, data):
 
 
 def get_patient(access_token, patient_id):
+    """query the patient endpoint"""
     response = requests.get(
         DRCHRONO_API_BASE + 'patients/{}'.format(patient_id),
         headers={
@@ -56,6 +59,7 @@ def get_patient(access_token, patient_id):
 
 
 def put_patient(access_token, patient_id, data):
+    """put to the patient endpoint"""
     return requests.put(
         DRCHRONO_API_BASE + 'patients/{}'.format(patient_id),
         headers={

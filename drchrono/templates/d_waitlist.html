@@ -6,7 +6,6 @@
         .ctr {
             position: absolute;
             top: 20%;
-            /*transform: translateY(-50%);*/
             text-align: center;
             width: 100%;
             font-size: 1.5em;
@@ -19,6 +18,14 @@
         #back-btn {
             margin-left: 15px;
             margin-top: 15px;
+        }
+
+        ul {
+            display: inline-block;
+            list-style: none;
+        }
+        li {
+            text-align: left;
         }
     </style>
 
@@ -38,7 +45,7 @@
                 <ul>
                     {% for appt in appointments %}
                         <li>
-                            <button type="submit" name="id" value="{{ appt.id }}" class="btn btn-success"><i class="fa fa-check" aria-hidden="true"></i></button>
+                            <button type="submit" name="model_id" value="{{ appt.id }}" class="btn btn-success"><i class="fa fa-check" aria-hidden="true"></i></button>
                             <strong>{{ appt.scheduled_time }}</strong> - 
                             <i class="fa fa-clock-o" aria-hidden="true"></i>
                             <strong>{{ appt.elapsed_time }}</strong> min - {{ appt.patient_name }}

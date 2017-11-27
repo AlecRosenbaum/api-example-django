@@ -1,53 +1,8 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block head %}
-
-    <style>
-        .ctr {
-            /*position: absolute;*/
-            /*top: 20%;*/
-            /*transform: translateY(-50%);*/
-            text-align: right;
-            width: 100%;
-            font-size: 1.5em;
-            margin-top: 30px;
-        }
-
-        #container {
-            height: unset;
-        }
-
-        input, select {
-            color: black;
-        }
-
-        .dropdown {
-            display: inline-block;
-            width: unset;
-        }
-
-        #back-btn {
-            position: absolute;
-            left: 15px;
-            top: 15px;
-        }
-
-        table {
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        th {
-            text-align: right;
-        }
-        td {
-            text-align: left;
-        }
-        #submit {
-            margin: 15px;
-        }
-    </style>
-
+    <link rel="stylesheet" type="text/css" href="{% static 'demographic.css' %}">
 {% endblock %}
 
 {% block content %}

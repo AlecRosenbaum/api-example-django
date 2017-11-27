@@ -1,0 +1,28 @@
+.ctr {
+    position: unset;
+    top: unset;
+    margin-top: 30px;
+}
+
+#container {
+    height: unset;
+}
+
+#back-btn {
+    position: absolute;
+}
+
+table {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+th {
+    text-align: right;
+}
+td {
+    text-align: left;
+}
+#submit {
+    margin: 15px;
+}

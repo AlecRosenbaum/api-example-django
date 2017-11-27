@@ -8,7 +8,7 @@ from django.contrib.auth import logout as auth_logout
 from django.utils.timezone import utc
 from django.contrib.auth.decorators import login_required
 
-from .forms import PatientCheckinForm, DemographicsForm
+from .forms import PatientCheckinForm, DemographicsForm, DoctorWaitlistForm
 from .models import Appointment
 from . import drchrono_api
 from .utils import conv_time
@@ -42,6 +42,7 @@ def patient_checkin(request, appt_id, patient_id):
             if data is None:
                 raise Http404("Patient not found.")
 
+            # TODO remove - this makes testing a lot easier
             print(data['first_name'])
             print(data['last_name'])
             print(data['social_security_number'])
@@ -87,7 +88,6 @@ def demographics(request, appt_id, patient_id):
     else:
         # query API for patient data, then populate form
         data = drchrono_api.get_patient(access_token, patient_id)
-
         form = DemographicsForm(initial=data)
 
     return render(
@@ -110,6 +110,7 @@ def check_in(request, appt_id):
     """
     access_token = request.user.social_auth.get(provider="drchrono").extra_data["access_token"]
     appointment_data = drchrono_api.get_appointment(access_token, appt_id)
+    print(appointment_data)
 
     if appointment_data is None:
         raise Http404("Appointment not found.")
@@ -132,17 +133,19 @@ def check_in(request, appt_id):
         appt = Appointment.objects.create(appointment_id=appt_id)
         appt.save()
     else:
-        # somehow denote error; redirect to error screen? only
-        # option is to return to the main menu?
-        print(response.status_code)
-        pass
-        # form.add_error(None, 'Data not submitted. Please try again.')
-
-    # TODO: show brief appointment details?
+        # Show error screen
+        return render(request, 'checkin_error.html')
 
     return render(
         request,
-        'checkin.html')
+        'checkin.html',
+        {
+            'appointment': {
+                'reason': appointment_data['reason'],
+                'scheduled_time': conv_time(appointment_data['scheduled_time'][-8:-3]),
+                'duration': appointment_data['duration'],
+            }
+        })
 
 
 @login_required()
@@ -155,13 +158,13 @@ def waitlist(request):
     """
 
     if request.method == 'POST':
-        # TODO create form and clean input data
-        print(request.POST['id'])
-        appt = Appointment.objects.get(id=request.POST['id'])
-        appt.seen = datetime.datetime.utcnow().replace(tzinfo=utc)
-        appt.save()
+        form = DoctorWaitlistForm(request.POST)
+        if form.is_valid():  # use the form to clean input
+            appt = Appointment.objects.get(id=form.cleaned_data['model_id'])
+            appt.seen = datetime.datetime.utcnow().replace(tzinfo=utc)
+            appt.save()
 
-        # Should this be changing anything on the API?
+            # TODO Should this be changing anything on the API?
 
         return HttpResponseRedirect(reverse('d_waitlist'))
     else:
@@ -173,14 +176,18 @@ def waitlist(request):
             access_token = request.user.social_auth.get(provider="drchrono").extra_data["access_token"]
 
             appointment_data = drchrono_api.get_appointment(access_token, appt.appointment_id)
-            print(appointment_data)
-            patient_data = drchrono_api.get_patient(access_token, appointment_data['patient'])
-            print(patient_data)
+            if appointment_data is None:
+                raise Http404("Appointment not found.")
 
+            patient_data = drchrono_api.get_patient(access_token, appointment_data['patient'])
+            if patient_data is None:
+                raise Http404("Patient not found.")
+
+            elapsed_time = int((datetime.datetime.utcnow().replace(tzinfo=utc) - appt.check_in).total_seconds()/60)
             appointments.append({
                 'id': appt.id,
                 'scheduled_time': conv_time(appointment_data['scheduled_time'][-8:-3]),
-                'elapsed_time': int((datetime.datetime.utcnow().replace(tzinfo=utc) - appt.check_in).total_seconds() / 60),
+                'elapsed_time': elapsed_time,
                 'patient_name': "{} {}".format(patient_data['first_name'], patient_data['last_name']),
             })
 
@@ -191,7 +198,6 @@ def waitlist(request):
             wait_times.append((seen_time - appt.check_in).total_seconds() / 60)
         avg_wait_time = int(sum(wait_times)/len(wait_times)) if len(wait_times) > 0 else 0
 
-    # TODO make template prettier (ailghn left?)
     return render(
         request,
         'd_waitlist.html',

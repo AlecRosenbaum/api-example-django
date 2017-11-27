@@ -2,11 +2,13 @@ from django import forms
 
 
 class PatientCheckinForm(forms.Form):
+    """patient confirmation form"""
     first_name = forms.CharField(label='First Name', max_length=100)
     last_name = forms.CharField(label='Last Name', max_length=100)
     social_security_number = forms.CharField(label='SSN', max_length=11, required=False)
 
 
+# some choices for the demographics form
 GENDERS = (
     ('blank', '',),
     ('Male', 'Male',),
@@ -49,6 +51,7 @@ STATES = (
 
 
 class DemographicsForm(forms.Form):
+    """demographics entry form - comments contain example data"""
     # doctor id
     doctor = forms.IntegerField(widget=forms.HiddenInput(), required=False)
     # 'first_name': 'Michelle',
@@ -113,3 +116,7 @@ class DemographicsForm(forms.Form):
     responsible_party_phone = forms.CharField(label='Responsible Party Phone', max_length=15, required=False)
     # 'responsible_party_email': '',
     responsible_party_email = forms.EmailField(label='Responsible Party Email', required=False)
+
+
+class DoctorWaitlistForm(forms.Form):
+    model_id = forms.IntegerField()
