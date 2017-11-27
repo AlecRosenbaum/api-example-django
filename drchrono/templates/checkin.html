@@ -20,19 +20,20 @@
             margin-left: 15px;
             margin-top: 15px;
         }
-        
+
     </style>
 
 {% endblock %}
 
 {% block content %}
-    <button id="back-btn" type="button" class="btn btn-info" onclick="location.href='{% url 'begin' %}'">Return To Main Screen</button>
+    <button id="back-btn" type="button" class="btn btn-info" onclick="location.href='{% url 'appt' %}'">Return To Main Screen</button>
     <h1 class="header"><i class="fa fa-check" aria-hidden="true"></i> Sucessfully Checked In!</h1>
     <div class="ctr">
         <div>
-            <p>Thanks -name-, you're all checked in!</p>
+            <p>Thanks, you're all checked in!</p>
         </div>
 
+        {% comment %}
         <div>
             <span>Current Waitlist:</span> <!-- current doctor only -->
             <ul>
@@ -41,6 +42,7 @@
                 <li><strong>1:20PM</strong> - Arrived <strong>1</strong> min ago.</li>
             </ul>
         </div>
+        {% endcomment %}
         
     </div>
 

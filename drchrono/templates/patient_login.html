@@ -41,7 +41,7 @@
 
     <h1 class="header">PATIENT LOGIN</h1>
     <div class="ctr">
-        <form action="{% url 'p_login' %}" method="post">
+        <form method="post">
             {% csrf_token %}
             <table>
                 {{ form.as_table }}

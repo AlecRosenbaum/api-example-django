@@ -1,3 +1,11 @@
 from django.db import models
 
-# Create your models here.
+
+class Appointment(models.Model):
+    # appointment_id
+    appointment_id = models.IntegerField()
+
+    # check_in
+    check_in = models.DateTimeField(auto_now_add=True)
+    # seen
+    seen = models.DateTimeField(null=True)
