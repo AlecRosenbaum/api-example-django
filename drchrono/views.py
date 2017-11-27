@@ -4,6 +4,7 @@ from django.shortcuts import render
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.contrib.auth import logout as auth_logout
+from django.utils.timezone import utc
 
 import requests
 
@@ -22,16 +23,8 @@ def appt(request):
             'date': str(datetime.date.today()),
         })
     data = response.json()
+    # TODO move all api calls into drchrono_api.py
 
-    def conv_time(time_str):
-        hr = int(time_str[:2])
-        mn = int(time_str[4:])
-        suffix = "PM" if hr >= 12 else "AM"
-        if hr > 12:
-            hr = hr % 12
-        return "{}:{:02d} {}".format(hr, mn, suffix)
-
-    # TODO filter to remove arrived appointments
     appts = [
         {'id': i['id'], 'patient': i['patient'], 'time':conv_time(i['scheduled_time'][-8:-3])}
         for i
@@ -54,25 +47,17 @@ def patient_checkin(request, appt_id, patient_id):
                 headers={
                     'Authorization': 'Bearer {}'.format(access_token),
                 })
-            # , params={
-            #         'first_name': form.cleaned_data['first_name'],
-            #         'last_name': form.cleaned_data['last_name'],
-            #         'social_security_number': form.cleaned_data['ssn']
-            #     })
             data = response.json()
             print(data)
+
+            # TODO verify data was actually returned, remove print
 
             fields = ('first_name', 'last_name', 'social_security_number')
             for i in fields:
                 if len(data[i]) > 0 and form.cleaned_data[i].lower() != data[i].lower():
                     form.add_error(i, 'Patient info on file does not match.')
 
-            # # ensure lookup found a patient
-            # if len(data['results']) > 1:
-            #     form.add_error(None, 'Multiple users found, be more specific!')
-            # elif len(data['results']) == 0:
-            #     form.add_error(None, 'No Patient Found.')
-            # else:
+            # TODO handle ssn properly/ do comparison without spaces/dashes/etc
 
             if len(form.errors) == 0:
                 return HttpResponseRedirect(reverse('demog', args=[appt_id, patient_id]))
@@ -135,12 +120,40 @@ def check_in(request, appt_id):
 
     sets arrival time for appointment in database
     """
+    access_token = request.user.social_auth.get(provider="drchrono").extra_data["access_token"]
+    response = requests.get(
+        DRCHRONO_API_BASE + 'appointments/{}'.format(appt_id),
+        headers={
+            'Authorization': 'Bearer {}'.format(access_token),
+        })
+    apppointment_data = response.json()
 
-    # TODO put appt_id to arrival
+    # TODO check that data is really there
+
+    # scrape required fields only (don't want to modify other things)
+    appointment = {
+        'doctor': apppointment_data['doctor'],
+        'duration': apppointment_data['duration'],
+        'exam_room': apppointment_data['exam_room'],
+        'office': apppointment_data['office'],
+        'patient': apppointment_data['patient'],
+        'scheduled_time': apppointment_data['scheduled_time'],
+        'status': 'Arrived'
+    }
+    response = requests.put(
+        DRCHRONO_API_BASE + 'appointments/{}'.format(appt_id),
+        headers={
+            'Authorization': 'Bearer {}'.format(access_token),
+        },
+        data=appointment)
+
+    # TODO verify put was successful
 
     # create entry in database
     appt = Appointment.objects.create(appointment_id=appt_id)
     appt.save()
+
+    # TODO: show breif appointment details?
 
     return render(
         request,
@@ -154,12 +167,64 @@ def waitlist(request):
     * lists currently waiting patients
     * allows doctors to mark patients as "seen"
     """
+
+    appointments = []
+    for appt in Appointment.objects.exclude(seen__isnull=False):
+        # This is not great (2 dependent API calls per appointment?!), but will work for now
+
+        # get appointment data
+        access_token = request.user.social_auth.get(provider="drchrono").extra_data["access_token"]
+        response = requests.get(
+            DRCHRONO_API_BASE + 'appointments/{}'.format(appt.appointment_id),
+            headers={
+                'Authorization': 'Bearer {}'.format(access_token),
+            })
+        appointment_data = response.json()
+        print(appointment_data)
+
+        # get patient data
+        response = requests.get(
+            DRCHRONO_API_BASE + 'patients/{}'.format(appointment_data['patient']),
+            headers={
+                'Authorization': 'Bearer {}'.format(access_token),
+            })
+        patient_data = response.json()
+
+        appointments.append({
+            'scheduled_time': conv_time(appointment_data['scheduled_time'][-8:-3]),
+            'elapsed_time': int((datetime.datetime.utcnow().replace(tzinfo=utc) - appt.check_in).total_seconds() / 60),  # TODO actually calculate using check_in time and now
+            'patient_name': "{} {}".format(patient_data['first_name'], patient_data['last_name']),
+        })
+
+    # calculate average wait time
+    wait_times = []
+    for appt in Appointment.objects.all():
+        seen_time = appt.seen if appt.seen is not None else datetime.datetime.utcnow().replace(tzinfo=utc)
+        wait_times.append((seen_time - appt.check_in).total_seconds() / 60)
+    avg_wait_time = int(sum(wait_times)/len(wait_times)) if len(wait_times) > 0 else 0
+
+    # TODO make template prettier (ailght left?)
     return render(
         request,
-        'd_waitlist.html')
+        'd_waitlist.html',
+        {
+            'appointments': appointments,
+            'avg_wait_time': avg_wait_time,
+        })
 
 
 def logout(request):
     """Logs out user"""
     auth_logout(request)
     return HttpResponseRedirect(reverse('home'))
+
+
+# TODO move and formalize this
+def conv_time(time_str):
+    """converts HH:MM -> H:MM PM"""
+    hr = int(time_str[:2])
+    mn = int(time_str[4:])
+    suffix = "PM" if hr >= 12 else "AM"
+    if hr > 12:
+        hr = hr % 12
+    return "{}:{:02d} {}".format(hr, mn, suffix)
