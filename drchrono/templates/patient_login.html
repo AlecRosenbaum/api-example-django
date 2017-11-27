@@ -31,4 +31,12 @@
 
     </div>
 
+    <script type="text/javascript" src="https://nosir.github.io/cleave.js/dist/cleave.min.js"></script>
+    <script type="text/javascript">
+        // ssn
+        var cleaveSSN = new Cleave('.input-ssn', {
+          blocks: [3, 2, 4],
+          delimiter: '-'
+        });
+    </script>
 {% endblock %}
