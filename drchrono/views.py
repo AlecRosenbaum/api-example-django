@@ -1,32 +1,24 @@
 import datetime
+import re
 
 from django.shortcuts import render
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, Http404
 from django.core.urlresolvers import reverse
 from django.contrib.auth import logout as auth_logout
 from django.utils.timezone import utc
 from django.contrib.auth.decorators import login_required
 
-import requests
-
 from .forms import PatientCheckinForm, DemographicsForm
-from .settings import DRCHRONO_API_BASE
 from .models import Appointment
+from . import drchrono_api
+from .utils import conv_time
 
 
 @login_required()
 def appt(request):
     """starting screen for appointment checkins (patient-facing)"""
     access_token = request.user.social_auth.get(provider="drchrono").extra_data["access_token"]
-    response = requests.get(
-        DRCHRONO_API_BASE + 'appointments',
-        headers={
-            'Authorization': 'Bearer {}'.format(access_token),
-        }, params={
-            'date': str(datetime.date.today()),
-        })
-    data = response.json()
-    # TODO move all api calls into drchrono_api.py
+    data = drchrono_api.get_todays_appointments(access_token)
 
     appts = [
         {'id': i['id'], 'patient': i['patient'], 'time':conv_time(i['scheduled_time'][-8:-3])}
@@ -45,25 +37,25 @@ def patient_checkin(request, appt_id, patient_id):
         if form.is_valid():
             # look up the user
             access_token = request.user.social_auth.get(provider="drchrono").extra_data["access_token"]
-            response = requests.get(
-                DRCHRONO_API_BASE + 'patients/{}'.format(patient_id),
-                headers={
-                    'Authorization': 'Bearer {}'.format(access_token),
-                })
-            data = response.json()
-            print(data)
+            data = drchrono_api.get_patient(access_token, patient_id)
+
+            if data is None:
+                raise Http404("Patient not found.")
+
             print(data['first_name'])
             print(data['last_name'])
             print(data['social_security_number'])
 
-            # TODO verify data was actually returned, remove print
-
-            fields = ('first_name', 'last_name', 'social_security_number')
+            fields = ('first_name', 'last_name')
             for i in fields:
                 if len(data[i]) > 0 and form.cleaned_data[i].lower() != data[i].lower():
                     form.add_error(i, 'Patient info on file does not match.')
 
-            # TODO handle ssn properly/ do comparison without spaces/dashes/etc
+            # further sanitize ssn
+            data_ssn = re.sub(r"(?!\d).?", "", data['social_security_number'])
+            form_ssn = re.sub(r"(?!\d).?", "", form.cleaned_data['social_security_number'])
+            if len(data['social_security_number']) > 0 and data_ssn != form_ssn:
+                form.add_error('social_security_number', 'Patient info on file does not match.')
 
             if len(form.errors) == 0:
                 return HttpResponseRedirect(reverse('demog', args=[appt_id, patient_id]))
@@ -84,28 +76,17 @@ def demographics(request, appt_id, patient_id):
     if request.method == 'POST':
         form = DemographicsForm(request.POST)
         if form.is_valid():
-            # process the data in form.cleaned_data as required
-            response = requests.put(
-                DRCHRONO_API_BASE + 'patients/{}'.format(patient_id),
-                headers={
-                    'Authorization': 'Bearer {}'.format(access_token),
-                },
-                data=form.cleaned_data)
+            # update patient demographic info
+            response = drchrono_api.put_patient(access_token, patient_id, form.cleaned_data)
 
             # handle API response
             if 200 <= response.status_code < 400:
                 return HttpResponseRedirect(reverse('checkin', args=[appt_id]))
             else:
                 form.add_error(None, 'Data not submitted. Please try again.')
-
     else:
         # query API for patient data, then populate form
-        response = requests.get(
-            DRCHRONO_API_BASE + 'patients/{}'.format(patient_id),
-            headers={
-                'Authorization': 'Bearer {}'.format(access_token),
-            })
-        data = response.json()
+        data = drchrono_api.get_patient(access_token, patient_id)
 
         form = DemographicsForm(initial=data)
 
@@ -128,39 +109,36 @@ def check_in(request, appt_id):
     sets arrival time for appointment in database
     """
     access_token = request.user.social_auth.get(provider="drchrono").extra_data["access_token"]
-    response = requests.get(
-        DRCHRONO_API_BASE + 'appointments/{}'.format(appt_id),
-        headers={
-            'Authorization': 'Bearer {}'.format(access_token),
-        })
-    apppointment_data = response.json()
+    appointment_data = drchrono_api.get_appointment(access_token, appt_id)
 
-    # TODO check that data is really there
+    if appointment_data is None:
+        raise Http404("Appointment not found.")
 
     # scrape required fields only (don't want to modify other things)
     appointment = {
-        'doctor': apppointment_data['doctor'],
-        'duration': apppointment_data['duration'],
-        'exam_room': apppointment_data['exam_room'],
-        'office': apppointment_data['office'],
-        'patient': apppointment_data['patient'],
-        'scheduled_time': apppointment_data['scheduled_time'],
+        'doctor': appointment_data['doctor'],
+        'duration': appointment_data['duration'],
+        'exam_room': appointment_data['exam_room'],
+        'office': appointment_data['office'],
+        'patient': appointment_data['patient'],
+        'scheduled_time': appointment_data['scheduled_time'],
         'status': 'Arrived'
     }
-    response = requests.put(
-        DRCHRONO_API_BASE + 'appointments/{}'.format(appt_id),
-        headers={
-            'Authorization': 'Bearer {}'.format(access_token),
-        },
-        data=appointment)
+    response = drchrono_api.put_appointment(access_token, appt_id, appointment)
 
-    # TODO verify put was successful
+    # handle API response
+    if 200 <= response.status_code < 400:
+        # create entry in database
+        appt = Appointment.objects.create(appointment_id=appt_id)
+        appt.save()
+    else:
+        # somehow denote error; redirect to error screen? only
+        # option is to return to the main menu?
+        print(response.status_code)
+        pass
+        # form.add_error(None, 'Data not submitted. Please try again.')
 
-    # create entry in database
-    appt = Appointment.objects.create(appointment_id=appt_id)
-    appt.save()
-
-    # TODO: show breif appointment details?
+    # TODO: show brief appointment details?
 
     return render(
         request,
@@ -193,25 +171,16 @@ def waitlist(request):
 
             # get appointment data
             access_token = request.user.social_auth.get(provider="drchrono").extra_data["access_token"]
-            response = requests.get(
-                DRCHRONO_API_BASE + 'appointments/{}'.format(appt.appointment_id),
-                headers={
-                    'Authorization': 'Bearer {}'.format(access_token),
-                })
-            appointment_data = response.json()
 
-            # get patient data
-            response = requests.get(
-                DRCHRONO_API_BASE + 'patients/{}'.format(appointment_data['patient']),
-                headers={
-                    'Authorization': 'Bearer {}'.format(access_token),
-                })
-            patient_data = response.json()
+            appointment_data = drchrono_api.get_appointment(access_token, appt.appointment_id)
+            print(appointment_data)
+            patient_data = drchrono_api.get_patient(access_token, appointment_data['patient'])
+            print(patient_data)
 
             appointments.append({
                 'id': appt.id,
                 'scheduled_time': conv_time(appointment_data['scheduled_time'][-8:-3]),
-                'elapsed_time': int((datetime.datetime.utcnow().replace(tzinfo=utc) - appt.check_in).total_seconds() / 60),  # TODO actually calculate using check_in time and now
+                'elapsed_time': int((datetime.datetime.utcnow().replace(tzinfo=utc) - appt.check_in).total_seconds() / 60),
                 'patient_name': "{} {}".format(patient_data['first_name'], patient_data['last_name']),
             })
 
@@ -222,7 +191,7 @@ def waitlist(request):
             wait_times.append((seen_time - appt.check_in).total_seconds() / 60)
         avg_wait_time = int(sum(wait_times)/len(wait_times)) if len(wait_times) > 0 else 0
 
-    # TODO make template prettier (ailght left?)
+    # TODO make template prettier (ailghn left?)
     return render(
         request,
         'd_waitlist.html',
@@ -243,14 +212,3 @@ def logout(request):
     """Logs out user"""
     auth_logout(request)
     return HttpResponseRedirect(reverse('home'))
-
-
-# TODO move and formalize this, this is not a view, just a utility function
-def conv_time(time_str):
-    """converts HH:MM -> H:MM PM"""
-    hr = int(time_str[:2])
-    mn = int(time_str[4:])
-    suffix = "PM" if hr >= 12 else "AM"
-    if hr > 12:
-        hr = hr % 12
-    return "{}:{:02d} {}".format(hr, mn, suffix)

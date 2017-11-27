@@ -15,22 +15,23 @@ GENDERS = (
 )
 RACE = (
     ('blank', '',),
-    ('American Indian or Alaska Native', 'American Indian or Alaska Native',),
-    ('Asian', 'Asian',),
-    ('Black or African American', 'Black or African American',),
-    ('Native Hawaiian or Other Pacific Islander', 'Native Hawaiian or Other Pacific Islander',),
-    ('White', 'White',),
-    ('Some Other Race', 'Some Other Race',),
+    ('indian', 'American Indian or Alaska Native',),
+    ('asian', 'Asian',),
+    ('black', 'Black or African American',),
+    ('hawaiian', 'Native Hawaiian or Other Pacific Islander',),
+    ('white', 'White',),
+    ('declined', 'Decline to Respond',),
 )
 ETHNICITY = (
     ('blank', '',),
-    ('Hispanic or Latino', 'Hispanic or Latino',),
-    ('Non-Hispanic or Latino', 'Non-Hispanic or Latino',),
+    ('hispanic', 'Hispanic or Latino',),
+    ('not_hispanic', 'Non-Hispanic or Latino',),
+    ('declined', 'Decline to Respond',),
 )
 LANGUAGES = (
-    ('blank', '',),
-    ('English', 'English',),
-    ('Spanish', 'Spanish',),
+    ('', '',),
+    ('eng', 'English',),
+    ('spa', 'Spanish',),
 )
 STATES = (
     ('', ''),

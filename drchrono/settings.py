@@ -121,4 +121,4 @@ LOGIN_REDIRECT_URL = "http://localhost:8000"
 DRCHRONO_API_BASE = "https://drchrono.com/api/"
 
 # Login URL
-LOGIN_URL = ""
+LOGIN_URL = "home"
