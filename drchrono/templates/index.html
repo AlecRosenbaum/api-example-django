@@ -1,11 +1,43 @@
-<!DOCTYPE html>
-<html>
-  <body>
-    <a href="{% url 'social:begin' 'drchrono' %}">
-      drchrono OAuth
-    </a>
-    <a href="{% url 'logout' %}">
-      logout
-    </a>
-  </body>
-</html>
+{% extends "base.html" %}
+
+{% block head %}
+
+    <style>
+        .ctr {
+            position: absolute;
+            top: 20%;
+            /*transform: translateY(-50%);*/
+            text-align: center;
+            width: 100%;
+            font-size: 1.5em;
+        }
+
+        input {
+            color: black;
+        }
+
+        .dropdown {
+            display: inline-block;
+            width: unset;
+        }
+
+        #back-btn {
+            margin-left: 15px;
+            margin-top: 15px;
+        }
+
+        .remove {
+            color: red;
+        }
+    </style>
+
+{% endblock %}
+
+{% block content %}
+    <h1 class="header">Please Login</h1>
+
+    <div class="ctr">
+        <button class="btn btn-primary" onclick="location.href='{% url 'social:begin' 'drchrono' %}'">Login</button>
+    </div>
+
+{% endblock %}

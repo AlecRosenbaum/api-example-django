@@ -3,26 +3,23 @@
 
 {% block head %}
     <style>
-        .ctr {
-            position: absolute;
-            top: 20%;
-            /*transform: translateY(-50%);*/
-            text-align: center;
-            width: 100%;
-            font-size: 1.5em;
-        }
-
         #corner-btn {
             position: absolute;
             left: 15px;
             top: 15px;
         }
 
-        .text-ctr {
+        .waitlist-btn {
             position: absolute;
             top: 0;
             width: 100%;
-            height: 100%;
+            height: 50%;
+        }
+        .appt-btn {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 50%;
         }
         .text {
             position: relative;
@@ -33,15 +30,23 @@
             font-size: 4em;
             display: block;
         }
+        .blue {
+            background-color: #17a2b8;
+        }
     </style>
 
 {% endblock %}
 
 {% block content %}
-    <div class="text-ctr" onclick="location.href='{% url 'p_login' %}';">
-        <span class="text">TAP TO BEGIN</span>
+    <div class="waitlist-btn" onclick="location.href='{% url 'd_waitlist' %}';">
+        <span class="text">DOCTOR's DEVICE</span>
+    </div>
+    <div class="appt-btn blue" onclick="location.href='{% url 'appt' %}';">
+        <span class="text">KIOSK</span>
     </div>
 
+    {% comment %}
     <button id="corner-btn" type="button" class="btn btn-info" onclick="location.href='{% url 'd_login' %}'"><i class="fa fa-cog" aria-hidden="true"></i></button>
+    {% endcomment %}
 
 {% endblock %}

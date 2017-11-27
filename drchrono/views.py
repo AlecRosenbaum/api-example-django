@@ -5,6 +5,7 @@ from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.contrib.auth import logout as auth_logout
 from django.utils.timezone import utc
+from django.contrib.auth.decorators import login_required
 
 import requests
 
@@ -13,7 +14,9 @@ from .settings import DRCHRONO_API_BASE
 from .models import Appointment
 
 
+@login_required()
 def appt(request):
+    """starting screen for appointment checkins (patient-facing)"""
     access_token = request.user.social_auth.get(provider="drchrono").extra_data["access_token"]
     response = requests.get(
         DRCHRONO_API_BASE + 'appointments',
@@ -33,12 +36,12 @@ def appt(request):
     return render(request, 'appointments.html', {'appts': appts})
 
 
+@login_required()
 def patient_checkin(request, appt_id, patient_id):
-    # if this is a POST request we need to process the form data
+    """confirms patient's identity with information saved on drcrhono's API"""
+
     if request.method == 'POST':
-        # create a form instance and populate it with data from the request:
         form = PatientCheckinForm(request.POST)
-        # check whether it's valid:
         if form.is_valid():
             # look up the user
             access_token = request.user.social_auth.get(provider="drchrono").extra_data["access_token"]
@@ -49,6 +52,9 @@ def patient_checkin(request, appt_id, patient_id):
                 })
             data = response.json()
             print(data)
+            print(data['first_name'])
+            print(data['last_name'])
+            print(data['social_security_number'])
 
             # TODO verify data was actually returned, remove print
 
@@ -61,8 +67,6 @@ def patient_checkin(request, appt_id, patient_id):
 
             if len(form.errors) == 0:
                 return HttpResponseRedirect(reverse('demog', args=[appt_id, patient_id]))
-
-    # if a GET (or any other method) we'll create a blank form
     else:
         form = PatientCheckinForm()
 
@@ -72,7 +76,9 @@ def patient_checkin(request, appt_id, patient_id):
         {'form': form})
 
 
+@login_required()
 def demographics(request, appt_id, patient_id):
+    """Handles updating demographics information"""
     access_token = request.user.social_auth.get(provider="drchrono").extra_data["access_token"]
 
     if request.method == 'POST':
@@ -115,6 +121,7 @@ def demographics(request, appt_id, patient_id):
 # TODO: add appointment details verification screen?
 
 
+@login_required()
 def check_in(request, appt_id):
     """sets appointment status to arrived
 
@@ -160,6 +167,7 @@ def check_in(request, appt_id):
         'checkin.html')
 
 
+@login_required()
 def waitlist(request):
     """Handles the doctor-facing waitlist
 
@@ -168,40 +176,51 @@ def waitlist(request):
     * allows doctors to mark patients as "seen"
     """
 
-    appointments = []
-    for appt in Appointment.objects.exclude(seen__isnull=False):
-        # This is not great (2 dependent API calls per appointment?!), but will work for now
+    if request.method == 'POST':
+        # TODO create form and clean input data
+        print(request.POST['id'])
+        appt = Appointment.objects.get(id=request.POST['id'])
+        appt.seen = datetime.datetime.utcnow().replace(tzinfo=utc)
+        appt.save()
 
-        # get appointment data
-        access_token = request.user.social_auth.get(provider="drchrono").extra_data["access_token"]
-        response = requests.get(
-            DRCHRONO_API_BASE + 'appointments/{}'.format(appt.appointment_id),
-            headers={
-                'Authorization': 'Bearer {}'.format(access_token),
+        # Should this be changing anything on the API?
+
+        return HttpResponseRedirect(reverse('d_waitlist'))
+    else:
+        appointments = []
+        for appt in Appointment.objects.exclude(seen__isnull=False):
+            # This is not great (2 dependent API calls per appointment?!), but will work for now
+
+            # get appointment data
+            access_token = request.user.social_auth.get(provider="drchrono").extra_data["access_token"]
+            response = requests.get(
+                DRCHRONO_API_BASE + 'appointments/{}'.format(appt.appointment_id),
+                headers={
+                    'Authorization': 'Bearer {}'.format(access_token),
+                })
+            appointment_data = response.json()
+
+            # get patient data
+            response = requests.get(
+                DRCHRONO_API_BASE + 'patients/{}'.format(appointment_data['patient']),
+                headers={
+                    'Authorization': 'Bearer {}'.format(access_token),
+                })
+            patient_data = response.json()
+
+            appointments.append({
+                'id': appt.id,
+                'scheduled_time': conv_time(appointment_data['scheduled_time'][-8:-3]),
+                'elapsed_time': int((datetime.datetime.utcnow().replace(tzinfo=utc) - appt.check_in).total_seconds() / 60),  # TODO actually calculate using check_in time and now
+                'patient_name': "{} {}".format(patient_data['first_name'], patient_data['last_name']),
             })
-        appointment_data = response.json()
-        print(appointment_data)
 
-        # get patient data
-        response = requests.get(
-            DRCHRONO_API_BASE + 'patients/{}'.format(appointment_data['patient']),
-            headers={
-                'Authorization': 'Bearer {}'.format(access_token),
-            })
-        patient_data = response.json()
-
-        appointments.append({
-            'scheduled_time': conv_time(appointment_data['scheduled_time'][-8:-3]),
-            'elapsed_time': int((datetime.datetime.utcnow().replace(tzinfo=utc) - appt.check_in).total_seconds() / 60),  # TODO actually calculate using check_in time and now
-            'patient_name': "{} {}".format(patient_data['first_name'], patient_data['last_name']),
-        })
-
-    # calculate average wait time
-    wait_times = []
-    for appt in Appointment.objects.all():
-        seen_time = appt.seen if appt.seen is not None else datetime.datetime.utcnow().replace(tzinfo=utc)
-        wait_times.append((seen_time - appt.check_in).total_seconds() / 60)
-    avg_wait_time = int(sum(wait_times)/len(wait_times)) if len(wait_times) > 0 else 0
+        # calculate average wait time
+        wait_times = []
+        for appt in Appointment.objects.all():
+            seen_time = appt.seen if appt.seen is not None else datetime.datetime.utcnow().replace(tzinfo=utc)
+            wait_times.append((seen_time - appt.check_in).total_seconds() / 60)
+        avg_wait_time = int(sum(wait_times)/len(wait_times)) if len(wait_times) > 0 else 0
 
     # TODO make template prettier (ailght left?)
     return render(
@@ -213,13 +232,20 @@ def waitlist(request):
         })
 
 
+def home(request):
+    """Login if not logged in already, otherwise redirect to device choice screen"""
+    if not request.user.is_anonymous():
+        return HttpResponseRedirect(reverse('begin'))
+    return render(request, "index.html")
+
+
 def logout(request):
     """Logs out user"""
     auth_logout(request)
     return HttpResponseRedirect(reverse('home'))
 
 
-# TODO move and formalize this
+# TODO move and formalize this, this is not a view, just a utility function
 def conv_time(time_str):
     """converts HH:MM -> H:MM PM"""
     hr = int(time_str[:2])

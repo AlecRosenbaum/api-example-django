@@ -37,7 +37,7 @@
 {% endblock %}
 
 {% block content %}
-    <button id="back-btn" type="button" class="btn btn-info" onclick="location.href='{% url 'begin' %}'">Back</button>
+    <button id="back-btn" type="button" class="btn btn-info" onclick="location.href='{% url 'appt' %}'">Back</button>
 
     <h1 class="header">PATIENT LOGIN</h1>
     <div class="ctr">
@@ -48,29 +48,6 @@
             </table>
             <input type="submit" class="btn" value="Submit" />
         </form>
-        
-        {% comment %}
-         <form class="form-group" action="{% url 'demog' %}">
-            <label for="fname">First Name</label>
-            <input type="text" name="gender" id="fname" value="fname"><br>
-            
-            <label for="lname">Last Name</label>
-            <input type="text" name="gender" id="lname" value="lname"><br>
-            
-            <label for="ssn">SSN</label>
-            <input type="text" name="gender" id="ssn" value="ssn"><br>
-
-            <label for="doctors">Select Doctor:</label>
-            <select id="doctors" class="form-control" name="doctors">
-                <option value="d1">Doctor 1</option>
-                <option value="d2">Doctor 2</option>
-                <option value="d3">Doctor 3</option>
-                <option value="d4">Doctor 4</option>
-            </select><br/>
-
-            <input type="submit" class="btn" value="Submit">
-        </form>
-        {% endcomment %}
 
     </div>
 
