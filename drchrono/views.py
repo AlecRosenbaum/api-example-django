@@ -76,7 +76,6 @@ def demographics(request, appt_id, patient_id):
 
     # query API for patient data, then populate form
     data = drchrono_api.get_patient(access_token, patient_id)
-    print(data)
 
     if request.method == 'POST':
         form = DemographicsForm(request.POST)
@@ -85,11 +84,12 @@ def demographics(request, appt_id, patient_id):
             response = drchrono_api.put_patient(access_token, patient_id, form.cleaned_data)
 
             # handle API response
-            print(response)
-            print(response.status_code)
             if 204 == response.status_code:
                 return HttpResponseRedirect(reverse('checkin', args=[appt_id]))
             else:
+                print(response)
+                print(response.status_code)
+                print(response.json())
                 form.add_error(None, 'Data not submitted. Please try again.')
     else:
         phone_fields = (
@@ -124,7 +124,6 @@ def check_in(request, appt_id):
     """
     access_token = request.user.social_auth.get(provider="drchrono").extra_data["access_token"]
     appointment_data = drchrono_api.get_appointment(access_token, appt_id)
-    print(appointment_data)
 
     if appointment_data is None:
         raise Http404("Appointment not found.")

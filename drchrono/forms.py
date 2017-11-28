@@ -67,8 +67,6 @@ class DemographicsForm(forms.Form):
     """demographics entry form - comments contain example data"""
     # doctor id
     doctor = forms.IntegerField(widget=forms.HiddenInput(), required=False)
-    doctor.widget.attrs['onfocus'] = ONCLICK_SPEAK
-    doctor.widget.attrs['oninput'] = ONINPUT_SPEAK
 
     # 'first_name': 'Michelle',
     first_name = forms.CharField(label='First Name', max_length=100)
