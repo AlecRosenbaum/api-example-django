@@ -10,10 +10,6 @@
             font-size: 1.5em;
         }
 
-        input {
-            color: black;
-        }
-
         #back-btn {
             margin-left: 15px;
             margin-top: 15px;
@@ -23,14 +19,13 @@
             line-height: 4 !important;
             margin: 2px;
         }
+        .checkmark {
+            color: white;
+        }
         .profile-pic {
             height: 78px;
             border-radius: .25rem;
         }
-/*
-        .patient_name, .scheduled_time {
-            width: 100%;
-        }*/
         .scheduled_time {
             margin-right: 15px;
         }
@@ -58,7 +53,7 @@
                         <div class="container">
                             <div class="row">
                                 <div class="col-sm-auto">   
-                                    <button type="submit" name="model_id" value="{{ appt.id }}" class="btn btn-success check-in"><i class="fa fa-check" aria-hidden="true"></i></button>   
+                                    <button type="submit" name="model_id" value="{{ appt.id }}" class="btn btn-success check-in"><i class="fa fa-check checkmark" aria-hidden="true"></i></button>   
                                     <img class="profile-pic" src="{{ appt.patient_photo }}"/>
                                 </div>
                                 <div class="col-sm-auto">
