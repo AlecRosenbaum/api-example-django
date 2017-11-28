@@ -81,10 +81,10 @@
     </div>
 
     <script type="text/javascript">
-        // redirect to the main page after a timeout
-        // setTimeout(function() {
-        //     location.href="{% url 'd_waitlist' %}";
-        // }, 60000); // ater 1 minute
+        // refresh after a timeout
+        setTimeout(function() {
+            location.href="{% url 'd_waitlist' %}";
+        }, 60000); // ater 1 minute
     </script>
 
 {% endblock %}
