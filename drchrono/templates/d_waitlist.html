@@ -19,12 +19,20 @@
             margin-top: 15px;
         }
 
-        ul {
-            display: inline-block;
-            list-style: none;
+        .check-in {
+            line-height: 4 !important;
+            margin: 2px;
         }
-        li {
-            text-align: left;
+        .profile-pic {
+            height: 78px;
+            border-radius: .25rem;
+        }
+/*
+        .patient_name, .scheduled_time {
+            width: 100%;
+        }*/
+        .scheduled_time {
+            margin-right: 15px;
         }
     </style>
 
@@ -42,28 +50,46 @@
         <br/>
 
         <div>
-            <span>Current Waitlist:</span> <!-- current doctor only -->
+            <span>Current Waitlist:</span>
             <form method="post">
                 {% csrf_token %}
-                <ul>
+                <div>
                     {% for appt in appointments %}
-                        <li>
-                            <button type="submit" name="model_id" value="{{ appt.id }}" class="btn btn-success"><i class="fa fa-check" aria-hidden="true"></i></button>
-                            <strong>{{ appt.scheduled_time }}</strong> - 
-                            <i class="fa fa-clock-o" aria-hidden="true"></i>
-                            <strong>{{ appt.elapsed_time }}</strong> min - {{ appt.patient_name }}
-                        </li>
-                    {% endfor %}
-                </ul>
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-sm-auto">   
+                                    <button type="submit" name="model_id" value="{{ appt.id }}" class="btn btn-success check-in"><i class="fa fa-check" aria-hidden="true"></i></button>   
+                                    <img class="profile-pic" src="{{ appt.patient_photo }}"/>
+                                </div>
+                                <div class="col-sm-auto">
+                                    <div class="container">
+                                        <div class="row patient_name">
+                                            {{ appt.patient_name }}
+                                        </div>
+                                        <div class="row">
+                                            <span class="scheduled_time">
+                                                <strong>{{ appt.scheduled_time }}</strong>
+                                            </span>
+                                            <span>
+                                                <i class="fa fa-clock-o" aria-hidden="true"></i>
+                                                <strong>{{ appt.elapsed_time }}</strong> min
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}                                 
+                </div>
             </form>
         </div> 
     </div>
 
     <script type="text/javascript">
         // redirect to the main page after a timeout
-        setTimeout(function() {
-            location.href="{% url 'd_waitlist' %}";
-        }, 60000); // ater 1 minute
+        // setTimeout(function() {
+        //     location.href="{% url 'd_waitlist' %}";
+        // }, 60000); // ater 1 minute
     </script>
 
 {% endblock %}

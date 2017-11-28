@@ -203,6 +203,7 @@ def waitlist(request):
                 'scheduled_time': conv_time(appointment_data['scheduled_time'][-8:-3]),
                 'elapsed_time': elapsed_time,
                 'patient_name': "{} {}".format(patient_data['first_name'], patient_data['last_name']),
+                'patient_photo': patient_data['patient_photo'],
             })
 
         # calculate average wait time
