@@ -5,15 +5,15 @@ from . import views
 
 
 urlpatterns = [
-    url(r'^$', views.home, name='home'),
-    url(r'^appt$', views.appt, name='appt'),
-    url(r'^p_login/(\d+)/(\d+)$', views.patient_checkin, name='p_login'),
-    url(r'^demographic/(\d+)/(\d+)$', views.demographics, name='demog'),
-    url(r'^checkin/(\d+)$', views.check_in, name='checkin'),
-    url(r'^d_waitlist$', views.waitlist, name='d_waitlist'),
+    url(r'^$', views.Home.as_view(), name='home'),
+    url(r'^appt$', views.Appt.as_view(), name='appt'),
+    url(r'^p_login/(\d+)/(\d+)$', views.PatientCheckin.as_view(), name='p_login'),
+    url(r'^demographic/(\d+)/(\d+)$', views.Demographics.as_view(), name='demog'),
+    url(r'^checkin/(\d+)$', views.Checkin.as_view(), name='checkin'),
+    url(r'^d_waitlist$', views.Waitlist.as_view(), name='d_waitlist'),
     url(r'^begin$', TemplateView.as_view(template_name='begin.html'), name='begin'),
     url(r'^d_login$', TemplateView.as_view(template_name='doctor_login.html'), name='d_login'),
-    url(r'^logout$', views.logout, name='logout'),
+    url(r'^logout$', views.Logout.as_view(), name='logout'),
 
     url(r'', include('social.apps.django_app.urls', namespace='social')),
 
