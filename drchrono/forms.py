@@ -18,7 +18,7 @@ class PatientCheckinForm(forms.Form):
     social_security_number = forms.CharField(label='Social Security Number', max_length=11, required=False)
     social_security_number.widget.attrs['class'] = 'input-ssn'
     social_security_number.widget.attrs['onfocus'] = ONCLICK_SPEAK
-    social_security_number.widget.attrs['oninput'] = ONINPUT_SPEAK
+    # social_security_number.widget.attrs['oninput'] = ONINPUT_SPEAK
 
 
 # some choices for the demographics form
@@ -105,7 +105,7 @@ class DemographicsForm(forms.Form):
     social_security_number = forms.CharField(label='Social Security Number', max_length=11, required=False)
     social_security_number.widget.attrs['class'] = 'input-ssn'
     social_security_number.widget.attrs['onfocus'] = ONCLICK_SPEAK
-    social_security_number.widget.attrs['oninput'] = ONINPUT_SPEAK
+    # social_security_number.widget.attrs['oninput'] = ONINPUT_SPEAK
 
     # 'race': 'blank',
     race = forms.ChoiceField(label='Race', choices=RACE, required=False)
