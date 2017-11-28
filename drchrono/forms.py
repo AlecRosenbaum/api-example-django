@@ -232,4 +232,5 @@ class DemographicsForm(forms.Form):
 
 
 class DoctorWaitlistForm(forms.Form):
+    """helper form for validating doctor waitlist inputs"""
     model_id = forms.IntegerField()

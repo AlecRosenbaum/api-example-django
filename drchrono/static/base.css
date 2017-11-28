@@ -1,10 +1,8 @@
 * {
-    /*color: white;*/
     color: #4f4f4f;
     font-family: sans-serif;
     padding: 0;
     margin: 0;
-    /*cursor: pointer;*/
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
@@ -16,7 +14,6 @@
     width: 100%;
     top: 0;
     position: absolute;
-    /*background-color: #5cc14e;*/
     background-color: #efefef;
     height: 100%;
 }
