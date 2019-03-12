@@ -1,0 +1,8 @@
+[tool.black]
+line-length = 100
+include = '(.*/tests/.*\.py|.*/migrations/.*\.py|chronometer/models/.*\.py|.*/graphql_schema/.*\.py|feature_flags/.*\.py)'
+exclude = '''
+/(
+    \.git
+)/
+'''

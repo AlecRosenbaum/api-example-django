@@ -7,12 +7,27 @@ services:
       # Any environmental variables you want can go in this plain text file. See the docs.
       - "docker/environment"
     ports:
-      - "8080:8080"
-#    command: /bin/bash -c "while true; do echo mark; sleep 2; done"
-    command: /bin/bash -c "python ./manage.py migrate && python ./manage.py runserver 0.0.0.0:8080"
+      - "8081:8081"
+    expose:
+      - "8081"
+    command: /bin/bash -c "while true; do echo mark; sleep 2; done"
+    # command: /bin/bash -c "python ./manage.py migrate && python ./manage.py runserver 0.0.0.0:8080"
     volumes:
       - ".:/usr/src/app"
     working_dir: /usr/src/app
     build:
       context: .
       dockerfile: ./docker/drchrono-dockerfile
+
+  shell:
+    build:
+      context: .
+      dockerfile: ./docker/reasonml.Dockerfile
+    ports:
+      - "3001:3001"
+    expose:
+      - "3001"
+    volumes:
+      - ".:/src/"
+    working_dir: /src/
+    command: /bin/bash -c "while true; do echo mark; sleep 2; done"

@@ -25,7 +25,10 @@ SECRET_KEY = '=*l&a&rk7jmiw$3euke*z9lu-na!^j^i&ddejfik!ajqlaymmc'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    "localhost",
+    "drchrono",
+]
 
 
 # Application definition
@@ -40,10 +43,17 @@ INSTALLED_APPS = (
     'drchrono',
     'social_django',
     'rest_framework',
+    'graphene_django',
+    'corsheaders',
 )
+
+GRAPHENE = {
+    'SCHEMA': 'drchrono.graphql_schema.schema' # Where your Graphene schema lives
+}
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -137,6 +147,10 @@ LOGGING = {
             'class': 'logging.FileHandler',
             'filename': 'debug.log',
         },
+        'console':{
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler'
+        },
     },
     'loggers': {
         'drchrono.endpoints.*': {
@@ -144,5 +158,12 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': True,
         },
+        'graphql.execution.utils': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
     },
 }
+
+CORS_ORIGIN_ALLOW_ALL = True
